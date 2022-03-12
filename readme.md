@@ -42,3 +42,5 @@ CREATE TABLE historial_prestamo (
     FOREIGN KEY (cod_autor_id) REFERENCES autor (cod_autor),
     FOREIGN KEY (rut_id) REFERENCES socio(rut)
 );
+
+--2. Se deben insertar los registros en las tablas correspondientes
