@@ -39,13 +39,15 @@ CREATE TABLE socio(
     );
 
 CREATE TABLE historial_prestamo (
-    id_prestamo INT PRIMARY KEY NOT NULL,
+    id_prestamo VARCHAR (100) PRIMARY KEY NOT NULL,
     cod_autor_id SERIAL NOT NULL,
     rut_id VARCHAR(9),
+    isbn_prestamo VARCHAR(13) NOT NULL,
     fecha_prest DATE NOT NULL,
     fecha_dev DATE NOT NULL,
     FOREIGN KEY (cod_autor_id) REFERENCES autor (cod_autor),
-    FOREIGN KEY (rut_id) REFERENCES socio(rut)
+    FOREIGN KEY (rut_id) REFERENCES socio(rut),
+    FOREIGN KEY (isbn_prestamo) REFERENCES libro (isbn)
 );
 
 --2. Se deben insertar los registros en las tablas correspondientes
@@ -98,17 +100,39 @@ VALUES ('5555555-5', 'SILVANA', 'MUÑOZ', 'PASAJE 3, SANTIAGO', '955555555');
 
 
 --Datos tabla historial_prestamo
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (1, 3, '1111111-1', '2020-01-20', '2020-01-27');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (2, 1, '5555555-5', '2020-01-20', '2020-01-30');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (3, 2, '3333333-3', '2020-01-22', '2020-01-30');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (4, 5, '4444444-4', '2020-01-23', '2020-01-30');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (5, 3, '2222222-2', '2020-01-27', '2020-02-04');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (6, 5, '1111111-1', '2020-01-31', '2020-02-12');
-INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, fecha_prest, fecha_dev)
-VALUES (7, 3, '3333333-3', '2020-01-20', '2020-01-27');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (1, 3, '1111111-1', '1111111111111', '2020-01-20', '2020-01-27');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (2, 1, '5555555-5', '2222222222222', '2020-01-20', '2020-01-30');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (3, 2, '3333333-3', '3333333333333', '2020-01-22', '2020-01-30');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (4, 5, '4444444-4', '4444444444444', '2020-01-23', '2020-01-30');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (5, 3, '2222222-2', '1111111111111', '2020-01-27', '2020-02-04');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (6, 5, '1111111-1', '4444444444444', '2020-01-31', '2020-02-12');
+INSERT INTO historial_prestamo(id_prestamo, cod_autor_id, rut_id, isbn_prestamo, fecha_prest, fecha_dev)
+VALUES (7, 3, '3333333-3', '1111111111111', '2020-01-20', '2020-01-27');
+
+--Realizar las siguientes consultas:
+--a. Mostrar todos los libros que posean menos de 300 páginas.
+SELECT titulo FROM libro WHERE pagina < 300;
+
+--b. Mostrar todos los autores que hayan nacido después del 01-01-1970.
+SELECT nom_autor, ape_autor FROM autor where nac_muerte > '1970-1970';
+
+--¿Cuál es el libro más solicitado?
+SELECT titulo, COUNT(*) AS solicitado
+FROM libro JOIN historial_prestamo
+ON libro.isbn = historial_prestamo.isbn_prestamo
+GROUP BY libro.titulo
+ORDER BY solicitado DESC;
+
+--d. Si se cobrara una multa de $100 por cada día de atraso, mostrar cuánto debería pagar cada usuario que entregue el préstamo después de 7 días.
+SELECT l.titulo, nom_socio, ape_socio, (fecha_dev - fecha_prest - 7)*100
+AS multa FROM historial_prestamo AS h 
+JOIN socio AS s ON h.rut_id = s.rut
+JOIN libro AS l on l.isbn = h.isbn_prestamo
+WHERE fecha_dev - fecha_prest > 7
+ORDER BY multa DESC;
